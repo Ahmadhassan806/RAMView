@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RAMView.App/RAMView.App.csproj" />
+    <Project Path="src/RAMView.Core/RAMView.Core.csproj" />
+    <Project Path="src/RAMView.Infrastructure/RAMView.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RAMView.Tests/RAMView.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,330 @@
+<Window x:Class="RAMView.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:RAMView.App.Controls"
+        xmlns:conv="clr-namespace:RAMView.App.Converters"
+        mc:Ignorable="d"
+        Title="RAM VIEW"
+        Height="480" Width="720"
+        MinHeight="180" MinWidth="340"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="True"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Opacity="{Binding WindowOpacity}"
+        SourceInitialized="OnSourceInitialized"
+        MouseDown="OnWindowMouseDown">
+
+    <Window.Resources>
+        <conv:VisualStateToColorConverter x:Key="StateToColor"/>
+        <conv:BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:BooleanToOpacityConverter x:Key="BoolToOpacity"/>
+        <conv:NullToVisibilityConverter x:Key="NullToVis"/>
+
+        <!-- Filter Chip Style -->
+        <Style x:Key="FilterChipStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="chipBorder"
+                                Background="#14FFFFFF"
+                                BorderBrush="#25FFFFFF"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="10,3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="chipBorder" Property="Background" Value="#2563EB"/>
+                                <Setter TargetName="chipBorder" Property="BorderBrush" Value="#60A5FA"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="chipBorder" Property="BorderBrush" Value="#70FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Main Shell Border with Dark Acrylic/Glass Appearance -->
+    <Border x:Name="RootBorder"
+            Background="#F0090D14"
+            BorderBrush="#38FFFFFF"
+            BorderThickness="1"
+            CornerRadius="14"
+            Padding="14">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="5" Opacity="0.8"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Top Header HUD -->
+                <RowDefinition Height="Auto"/> <!-- Ghost Mode Notice Banner -->
+                <RowDefinition Height="*"/>    <!-- Center Treemap / Strip Visualization -->
+                <RowDefinition Height="Auto"/> <!-- Bottom Controls & Filters -->
+            </Grid.RowDefinitions>
+
+            <!-- ================= TOP HEADER HUD (§14) ================= -->
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/> <!-- Title & RAM Total -->
+                    <ColumnDefinition Width="*"/>    <!-- Search Input -->
+                    <ColumnDefinition Width="Auto"/> <!-- Window Actions -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Title & RAM Counter -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Dynamic Pulse Dot Indicator -->
+                    <Ellipse Width="9" Height="9"
+                             Fill="{Binding VisualState, Converter={StaticResource StateToColor}}"
+                             Margin="0,0,8,0"
+                             VerticalAlignment="Center">
+                        <Ellipse.Effect>
+                            <DropShadowEffect Color="#10B981" BlurRadius="8" ShadowDepth="0" Opacity="0.8"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+
+                    <!-- App Title -->
+                    <TextBlock Text="RAM VIEW"
+                               Foreground="#FFFFFF"
+                               FontWeight="ExtraBold"
+                               FontSize="14"
+                               VerticalAlignment="Center"
+                               Margin="0,0,12,0"/>
+
+                    <!-- Live RAM Text & Visual Mini Gauge -->
+                    <Border Background="#1CFFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="9,4" VerticalAlignment="Center">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Snapshot.SummaryText, FallbackValue='Scanning RAM...'}"
+                                           Foreground="#60A5FA"
+                                           FontWeight="Bold"
+                                           FontSize="13"/>
+                                <TextBlock Text="{Binding Snapshot.SystemMemoryUsagePercentage, StringFormat='• {0:F1}% Used', FallbackValue=''}"
+                                           Foreground="#94A3B8"
+                                           FontSize="12"
+                                           Margin="6,0,0,0"/>
+                            </StackPanel>
+                            <!-- Mini RAM Load Progress Bar -->
+                            <ProgressBar Minimum="0" Maximum="100"
+                                         Value="{Binding Snapshot.SystemMemoryUsagePercentage, Mode=OneWay, FallbackValue=0}"
+                                         Height="3"
+                                         Margin="0,3,0,0"
+                                         Background="#25FFFFFF"
+                                         Foreground="#3B82F6"
+                                         BorderThickness="0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Live Search Box (§13) -->
+                <Grid Grid.Column="1" MaxWidth="220" HorizontalAlignment="Right" Margin="14,0">
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource SearchTextBoxStyle}"
+                             Height="28"
+                             VerticalContentAlignment="Center"
+                             Padding="26,0,8,0"/>
+                    <!-- Search Icon Placeholder -->
+                    <TextBlock Text="🔍"
+                               FontSize="11"
+                               Foreground="#64748B"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Margin="8,0,0,0"
+                               IsHitTestVisible="False"/>
+                    <!-- Placeholder text when empty -->
+                    <TextBlock Text="Filter processes..."
+                               Foreground="#64748B"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Margin="26,0,0,0"
+                               IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SearchText}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Window Control Buttons (Mode toggle, Minimize, Close) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Compact / Overlay Mode Toggle Button -->
+                    <Button Command="{Binding ToggleModeCommand}"
+                            Content="⬒"
+                            ToolTip="Toggle Compact Strip / Overlay Mode"
+                            Style="{StaticResource GlassButtonStyle}"
+                            Width="28" Height="28"
+                            Padding="0"
+                            Margin="0,0,4,0"/>
+
+                    <!-- Settings Button -->
+                    <Button Click="OnOpenSettingsClicked"
+                            Content="⚙"
+                            ToolTip="Settings &amp; Preferences"
+                            Style="{StaticResource GlassButtonStyle}"
+                            Width="28" Height="28"
+                            Padding="0"
+                            Margin="0,0,4,0"/>
+
+                    <!-- Minimize to Tray Button -->
+                    <Button Click="OnMinimizeClicked"
+                            Content="—"
+                            ToolTip="Minimize to System Tray"
+                            Style="{StaticResource GlassButtonStyle}"
+                            Width="28" Height="28"
+                            Padding="0"
+                            Margin="0,0,4,0"/>
+
+                    <!-- Close Window Button -->
+                    <Button Click="OnCloseClicked"
+                            Content="✕"
+                            ToolTip="Close (Minimizes to Tray)"
+                            Style="{StaticResource GlassButtonStyle}"
+                            Width="28" Height="28"
+                            Padding="0"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Ghost Mode Notice Banner (Visible only when ClickThrough is active) -->
+            <Border Grid.Row="1"
+                    Background="#303B82F6"
+                    BorderBrush="#603B82F6"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8,3"
+                    Margin="0,0,0,6"
+                    Visibility="{Binding ClickThrough, Converter={StaticResource BoolToVis}}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="👻 Ghost (Click-Through) Mode Active: mouse clicks pass directly through to background apps. Press Ctrl+Shift+R or use tray icon to toggle."
+                               Foreground="#93C5FD" FontSize="11" FontWeight="Medium"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ================= CENTER VISUALIZATION AREA ================= -->
+            <Grid Grid.Row="2" ClipToBounds="True" Margin="0,2,0,8">
+                <!-- Mode A: Squarified Treemap Layout with translucent white boxes -->
+                <controls:TreemapView x:Name="TreemapControl">
+                    <controls:TreemapView.Style>
+                        <Style TargetType="controls:TreemapView">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AppMode}" Value="CompactStrip">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </controls:TreemapView.Style>
+                </controls:TreemapView>
+
+                <!-- Mode B: Taskbar Compact Strip -->
+                <controls:CompactStripView x:Name="CompactStripControl" VerticalAlignment="Center">
+                    <controls:CompactStripView.Style>
+                        <Style TargetType="controls:CompactStripView">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AppMode}" Value="CompactStrip">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </controls:CompactStripView.Style>
+                </controls:CompactStripView>
+
+                <!-- Process Details Inspection Modal (Overlay when a box is clicked) -->
+                <Border Background="#60000000"
+                        CornerRadius="10"
+                        Visibility="{Binding SelectedProcess, Converter={StaticResource NullToVis}}">
+                    <controls:ProcessDetailModal HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <!-- ================= BOTTOM CONTROLS & FILTER CHIPS (§13, §14) ================= -->
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/> <!-- Filter Presets -->
+                    <ColumnDefinition Width="*"/>    <!-- Status info -->
+                    <ColumnDefinition Width="Auto"/> <!-- Toggles (Pin, Group, Clickthrough) -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Modern Filter Chips -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <RadioButton Content="All" IsChecked="True" GroupName="FilterGroup"
+                                 Checked="OnFilterPresetChecked" Tag="All"
+                                 Style="{StaticResource FilterChipStyle}"/>
+                    <RadioButton Content="Apps" GroupName="FilterGroup"
+                                 Checked="OnFilterPresetChecked" Tag="Applications"
+                                 Style="{StaticResource FilterChipStyle}"/>
+                    <RadioButton Content="System" GroupName="FilterGroup"
+                                 Checked="OnFilterPresetChecked" Tag="System"
+                                 Style="{StaticResource FilterChipStyle}"/>
+                    <RadioButton Content="Highest" GroupName="FilterGroup"
+                                 Checked="OnFilterPresetChecked" Tag="Highest"
+                                 Style="{StaticResource FilterChipStyle}"/>
+                </StackPanel>
+
+                <!-- Center Status Info -->
+                <TextBlock Grid.Column="1"
+                           Text="{Binding StatusMessage}"
+                           Foreground="#94A3B8"
+                           FontSize="11"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+
+                <!-- Right Toggles (Group, Pin, Click-Through, Lock) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Group Instances Toggle -->
+                    <ToggleButton Content="Group"
+                                  IsChecked="{Binding IsGrouped}"
+                                  ToolTip="Toggle process grouping (aggregates chrome instances, etc.)"
+                                  Style="{StaticResource GlassToggleButtonStyle}"
+                                  Margin="0,0,5,0"/>
+
+                    <!-- Always on Top Pin Toggle -->
+                    <ToggleButton Content="📌 Pin"
+                                  IsChecked="{Binding AlwaysOnTop}"
+                                  Click="OnAlwaysOnTopToggled"
+                                  ToolTip="Pin as Always on Top HUD"
+                                  Style="{StaticResource GlassToggleButtonStyle}"
+                                  Margin="0,0,5,0"/>
+
+                    <!-- Click-through Toggle -->
+                    <ToggleButton Content="Ghost"
+                                  IsChecked="{Binding ClickThrough}"
+                                  Click="OnClickThroughToggled"
+                                  ToolTip="Toggle click-through mode (transparent to mouse)"
+                                  Style="{StaticResource GlassToggleButtonStyle}"
+                                  Margin="0,0,5,0"/>
+
+                    <!-- Lock Position Toggle -->
+                    <ToggleButton Content="🔒"
+                                  IsChecked="{Binding LockPosition}"
+                                  ToolTip="Lock overlay position (prevents moving/dragging)"
+                                  Style="{StaticResource GlassToggleButtonStyle}"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

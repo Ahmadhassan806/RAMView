@@ -1,0 +1,24 @@
+﻿# Visual Studio / .NET
+[Bb]in/
+[Oo]bj/
+[Dd]ist/portable/*.pdb
+.vs/
+*.user
+*.suo
+
+# Node / Web
+node_modules/
+.npm/
+web/dist/
+web/node_modules/
+
+# OS / Misc
+.DS_Store
+Thumbs.db
+*.log
+
+.agent/
+.gemini/
+
+dist/
+*.exe

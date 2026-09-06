@@ -1,0 +1,134 @@
+<UserControl x:Class="RAMView.App.Controls.ProcessDetailModal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:conv="clr-namespace:RAMView.App.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="280" d:DesignWidth="380">
+    <UserControl.Resources>
+        <conv:ByteArrayToImageConverter x:Key="BytesToImage"/>
+        <conv:NullToVisibilityConverter x:Key="NullToVis"/>
+    </UserControl.Resources>
+
+    <Border Background="#F80B0F19"
+            BorderBrush="#40FFFFFF"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="18"
+            Width="380">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="6" Opacity="0.85"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Image Grid.Column="0"
+                       Source="{Binding SelectedProcess.IconPngBytes, Converter={StaticResource BytesToImage}}"
+                       Width="28" Height="28"
+                       Margin="0,0,10,0"
+                       VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding SelectedProcess.ProcessName}"
+                               FontWeight="Bold"
+                               FontSize="16"
+                               Foreground="#FFFFFF"
+                               TextTrimming="CharacterEllipsis"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                        <TextBlock Text="{Binding SelectedProcess.ProcessId, StringFormat='PID: {0}'}"
+                                   FontSize="11"
+                                   Foreground="#94A3B8"/>
+                        <TextBlock Text="{Binding SelectedProcess.InstanceCount, StringFormat='• {0} instances'}"
+                                   FontSize="11"
+                                   Foreground="#60A5FA"
+                                   Margin="6,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Close Button -->
+                <Button Grid.Column="2"
+                        Command="{Binding ClearSelectionCommand}"
+                        Content="✕"
+                        Width="26" Height="26"
+                        Style="{StaticResource GlassButtonStyle}"
+                        Padding="0"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Right"/>
+            </Grid>
+
+            <!-- Details List -->
+            <Border Grid.Row="1" Background="#14FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,14">
+                <StackPanel>
+                    <Grid Margin="0,3">
+                        <TextBlock Text="Working Set (RAM):" Foreground="#94A3B8" FontSize="12"/>
+                        <TextBlock Text="{Binding SelectedProcess.FormattedMemory}" Foreground="#38BDF8" FontWeight="Bold" FontSize="13" HorizontalAlignment="Right"/>
+                    </Grid>
+
+                    <Grid Margin="0,3">
+                        <TextBlock Text="Tracked Share:" Foreground="#94A3B8" FontSize="12"/>
+                        <TextBlock Text="{Binding SelectedProcess.FormattedPercentage}" Foreground="#F1F5F9" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Right"/>
+                    </Grid>
+
+                    <Grid Margin="0,3" Visibility="{Binding SelectedProcess.ExecutablePath, Converter={StaticResource NullToVis}}">
+                        <TextBlock Text="Path:" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Top"/>
+                        <TextBlock Text="{Binding SelectedProcess.ExecutablePath}"
+                                   Foreground="#CBD5E1"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"
+                                   Margin="36,0,0,0"
+                                   MaxHeight="40"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Action Buttons -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Command="{Binding OpenFileLocationCommand}"
+                        Content="Open Folder"
+                        Style="{StaticResource GlassButtonStyle}"
+                        Margin="0,0,6,0"
+                        FontSize="11"
+                        Visibility="{Binding SelectedProcess.ExecutablePath, Converter={StaticResource NullToVis}}"/>
+
+                <Button Grid.Column="1"
+                        Command="{Binding CopyProcessInfoCommand}"
+                        Content="Copy Info"
+                        Style="{StaticResource GlassButtonStyle}"
+                        Margin="0,0,6,0"
+                        FontSize="11"/>
+
+                <Button Grid.Column="2"
+                        Command="{Binding TerminateProcessCommand}"
+                        Content="End Process"
+                        Background="#50EF4444"
+                        BorderBrush="#EF4444"
+                        Foreground="#FFFFFF"
+                        Style="{StaticResource GlassButtonStyle}"
+                        FontSize="11"/>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>
