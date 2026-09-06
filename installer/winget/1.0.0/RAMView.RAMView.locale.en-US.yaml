@@ -1,12 +1,12 @@
-﻿# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
 
 PackageIdentifier: RAMView.RAMView
 PackageVersion: 1.0.0
 PackageLocale: en-US
 Publisher: RAMView
-PublisherUrl: https://github.com/REPLACE_WITH_YOUR_USERNAME/RAMView
+PublisherUrl: https://github.com/Ahmadhassan806/RAMView
 PackageName: RAMView
-PackageUrl: https://github.com/REPLACE_WITH_YOUR_USERNAME/RAMView
+PackageUrl: https://github.com/Ahmadhassan806/RAMView
 License: MIT
 ShortDescription: Real-time physical RAM squarified treemap visualizer and process monitor for Windows.
 Description: |
