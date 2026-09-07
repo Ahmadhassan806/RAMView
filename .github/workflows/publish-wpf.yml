@@ -1,0 +1,53 @@
+name: Build & Release WPF App
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish self-contained exe
+        run: |
+          dotnet publish ./src/RAMView.App/RAMView.App.csproj \
+            -c Release \
+            -r win-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -o publish
+        shell: pwsh
+
+      - name: Archive publish folder
+        run: |
+          Compress-Archive -Path publish\* -DestinationPath RAMView.zip
+        shell: pwsh
+
+      - name: Create Release & Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "RAMView ${{ github.ref_name }}"
+          body: |
+            **RAMView** – Windows WPF visualizer (self‑contained).
+            * Built from commit ${{ github.sha }}.
+            * Includes `RAMView.exe` (single‑file) and `RAMView.zip`.
+          files: |
+            publish\RAMView.exe
+            RAMView.zip
+          draft: false
+          prerelease: false
