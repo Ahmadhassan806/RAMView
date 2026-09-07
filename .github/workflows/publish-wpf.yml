@@ -21,7 +21,10 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Publish self-contained exe
+      # ----------------------------------------------------------
+      # Build a self‑contained single‑file EXE
+      # ----------------------------------------------------------
+      - name: Publish self‑contained EXE
         run: |
           dotnet publish ./src/RAMView.App/RAMView.App.csproj \
             -c Release \
@@ -32,9 +35,54 @@ jobs:
             -o publish
         shell: pwsh
 
-      - name: Archive publish folder
+      # ----------------------------------------------------------
+      # Build an MSIX package (optional – requires a signing cert)
+      # ----------------------------------------------------------
+      - name: Publish MSIX package
+        run: |
+          dotnet publish ./src/RAMView.App/RAMView.App.csproj \
+            -c Release \
+            -r win-x64 \
+            -p:GenerateAppxPackageOnBuild=true \
+            -p:AppxPackageSigningEnabled=false \
+            -o msix
+        shell: pwsh
+
+      - name: Sign MSIX (if certificate available)
+        if: secrets.MSIX_CERTIFICATE && secrets.MSIX_CERT_PASSWORD
+        env:
+          CERT: ${{ secrets.MSIX_CERTIFICATE }}
+          PASS: ${{ secrets.MSIX_CERT_PASSWORD }}
+        run: |
+          # Write the base64‑encoded .pfx to a temporary file
+          $pfxPath = "$env:TEMP\cert.pfx"
+          [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:CERT))
+          # Locate the generated .msix (or .appx) file
+          $msix = Get-ChildItem -Path msix -Filter "*.msix" -Recurse | Select-Object -First 1
+          if ($msix) {
+            "Signing $($msix.FullName)"
+            signtool sign /fd SHA256 /f $pfxPath /p $env:PASS $msix.FullName
+          } else {
+            Write-Host "No MSIX package found – skipping signing."
+          }
+        shell: pwsh
+
+      # ----------------------------------------------------------
+      # Package assets for release
+      # ----------------------------------------------------------
+      - name: Archive EXE folder
         run: |
           Compress-Archive -Path publish\* -DestinationPath RAMView.zip
+        shell: pwsh
+
+      - name: Prepare release notes
+        id: notes
+        run: |
+          echo "# Release ${{ github.ref_name }}" > notes.md
+          echo "" >> notes.md
+          git log -1 --pretty=format:"* %s" >> notes.md
+          echo "" >> notes.md
+          echo "[Full changelog](${{ github.server_url }}/${{ github.repository }}/compare/${{ github.ref_name }}...${{ github.sha }})" >> notes.md
         shell: pwsh
 
       - name: Create Release & Upload Assets
@@ -42,12 +90,10 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: "RAMView ${{ github.ref_name }}"
-          body: |
-            **RAMView** – Windows WPF visualizer (self‑contained).
-            * Built from commit ${{ github.sha }}.
-            * Includes `RAMView.exe` (single‑file) and `RAMView.zip`.
+          body_path: notes.md
           files: |
             publish\RAMView.exe
             RAMView.zip
+            msix\*.msix
           draft: false
           prerelease: false
