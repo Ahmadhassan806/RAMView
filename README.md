@@ -37,13 +37,16 @@ It transforms task monitoring from sterile lists into a living, ambient data vis
 
 ## 🚀 Quick Start
 
-### Running the Standalone Portable App
-Run the self-contained single executable directly without installing any runtimes:
-```cmd
-dist\portable\RAMView.App.exe
+### Install via Windows Package Manager (WinGet)
+Run in PowerShell or Command Prompt:
+```powershell
+winget install Ahmadhassan806.RAMView
 ```
 
-### Installing on Windows
+### Download Portable Release
+Download the latest self-contained standalone executable directly from [GitHub Releases](https://github.com/Ahmadhassan806/RAMView/releases/latest) without installing any runtimes.
+
+### Local Installation Script
 Run the PowerShell installer script:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\installer\Install-RAMView.ps1 -CreateDesktopShortcut
