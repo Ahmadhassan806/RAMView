@@ -214,6 +214,19 @@ public partial class MainWindow : Window
         dialog.ShowDialog();
     }
 
+    private void OnBuyCoffeeClicked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "https://buymeacoffee.com/ahmadhassan806",
+                UseShellExecute = true
+            });
+        }
+        catch { }
+    }
+
     private void OnMinimizeClicked(object sender, RoutedEventArgs e)
     {
         Hide();

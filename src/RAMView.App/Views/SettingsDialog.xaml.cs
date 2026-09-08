@@ -58,4 +58,18 @@ public partial class SettingsDialog : Window
     {
         Close();
     }
+
+    private void OnBuyCoffeeClicked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "https://buymeacoffee.com/ahmadhassan806",
+                UseShellExecute = true
+            });
+        }
+        catch { }
+    }
 }
+

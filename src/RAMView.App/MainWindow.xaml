@@ -187,6 +187,15 @@
                             Padding="0"
                             Margin="0,0,4,0"/>
 
+                    <!-- Buy Me a Coffee Button -->
+                    <Button Click="OnBuyCoffeeClicked"
+                            Content="☕"
+                            ToolTip="Buy Me a Coffee / Support Developer"
+                            Style="{StaticResource GlassButtonStyle}"
+                            Width="28" Height="28"
+                            Padding="0"
+                            Margin="0,0,4,0"/>
+
                     <!-- Minimize to Tray Button -->
                     <Button Click="OnMinimizeClicked"
                             Content="—"

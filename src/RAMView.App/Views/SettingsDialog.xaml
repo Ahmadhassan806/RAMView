@@ -69,6 +69,29 @@
                     <CheckBox x:Name="chkGroupProcesses" Content="Group Same-Name Process Instances" Foreground="#E2E8F0" Margin="0,4"/>
                     <CheckBox x:Name="chkShowSystem" Content="Show Windows System Processes" Foreground="#E2E8F0" Margin="0,4"/>
                     <CheckBox x:Name="chkStartWithWindows" Content="Start Automatically with Windows" Foreground="#E2E8F0" Margin="0,4"/>
+
+                    <!-- Support Developer / Buy Me a Coffee -->
+                    <Border Background="#1AFFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,12,0,4">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Enjoying RAM View?" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12"/>
+                                <TextBlock Text="Support development with a coffee ☕" Foreground="#94A3B8" FontSize="11"/>
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    Content="☕ Buy Me a Coffee"
+                                    Style="{StaticResource GlassButtonStyle}"
+                                    Background="#D97706"
+                                    BorderBrush="#F59E0B"
+                                    Foreground="#FFFFFF"
+                                    FontWeight="SemiBold"
+                                    Padding="10,4"
+                                    Click="OnBuyCoffeeClicked"/>
+                        </Grid>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
 

@@ -43,7 +43,7 @@ jobs:
           name: "RAMView ${{ github.ref_name }}"
           body_path: notes.md
           files: |
-            publish\RAMView.exe
+            publish/*.exe
             RAMView.zip
           draft: false
           prerelease: false
